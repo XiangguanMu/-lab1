@@ -1,3 +1,12 @@
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+    cout << "Hello world!" << endl;
+    return 0;
+}
 #include<iostream>
 #include<string>
 #include<vector>
@@ -28,10 +37,10 @@ public:
         Registers[0] = bitset<64>(0);
     }
 
-    void ReadWrite(bitset<5> RdReg1, bitset<5> RdReg2, bitset<5> WrtReg, bitset<64> WrtData, bitset<1> WrtEnable) //WrtEnable 0 is read else is read and write 
+    void ReadWrite(bitset<5> RdReg1, bitset<5> RdReg2, bitset<5> WrtReg, bitset<64> WrtData, bitset<1> WrtEnable) //WrtEnable 0 is read else is read and write
     {
         // TODO: implement!
-        
+
     }
 
     void OutputRF()
@@ -158,7 +167,7 @@ public:
     bitset<64> MemoryAccess(bitset<64> Address, bitset<64> WriteData, bitset<1> readmem, bitset<1> writemem)
     {
         // TODO: implement!
-        
+
     }
 
     void OutputDataMem()
@@ -221,7 +230,7 @@ int main()
         isBranch = instruction.to_string().substr(25, 7) == string("1100011");
         isIType = instruction.to_string().substr(25, 5) == string("00100") ||
             instruction.to_string().substr(25, 5) == string("11000");
-        wrtEnable = !(isStore.to_ulong() || isBranch.to_ulong()); 
+        wrtEnable = !(isStore.to_ulong() || isBranch.to_ulong());
         if (isRType[0] == 1) {
             if(instruction.to_string().substr(17, 3) == string("000")) {
                 if(instruction.to_string().substr(0, 7) == string("0000000"))
@@ -249,9 +258,9 @@ int main()
 
         // 2. Register File Instruction
         myRF.ReadWrite(
-             (isJType[0]) ? 
-                 bitset<5>(string("00000")) : bitset<5>(instruction.to_string().substr(12, 5)), 
-             (isIType[0] || isJType[0] || isLoad[0]) ? 
+             (isJType[0]) ?
+                 bitset<5>(string("00000")) : bitset<5>(instruction.to_string().substr(12, 5)),
+             (isIType[0] || isJType[0] || isLoad[0]) ?
                  bitset<5>(string("00000")) : bitset<5>(instruction.to_string().substr(7, 5)),
             (isIType[0] || isRType[0] || isJType[0] || isLoad[0])? bitset<5>(instruction.to_string().substr(20, 5)) : bitset<5>(string("00000")),
             bitset<64>(0), wrtEnable);
@@ -288,7 +297,7 @@ int main()
         {
 	        ;
         }
-        
+
         myALU.ALUOperation(aluOp, myRF.ReadData1, (isIType[0] || isJType[0] || isLoad[0] || isStore[0]) ? tmp : myRF.ReadData2);//
 
         // 4. Read/Write Mem(Memory Access)
@@ -296,14 +305,14 @@ int main()
 
         // 5. Register File Update(Write Back)
         myRF.ReadWrite(
-            (isJType[0]) ? bitset<5>(string("00000")) : bitset<5>(instruction.to_string().substr(12, 5)), 
+            (isJType[0]) ? bitset<5>(string("00000")) : bitset<5>(instruction.to_string().substr(12, 5)),
             (isJType[0] || isIType[0] || isLoad[0]) ? bitset<5>(string("00000")) : bitset<5>(instruction.to_string().substr(7, 5)),
             (isIType[0] || isRType[0] || isJType[0] || isLoad[0]) ? bitset<5>(instruction.to_string().substr(20, 5)) : bitset<5>(string("00000")),
             isLoad[0] ? myDataMem.readdata : myALU.ALUresult, wrtEnable);
 
         // Update PC
         if (isBranch[0] && myRF.ReadData1 == myRF.ReadData2) {
-            bitset<32> addressExtend;  
+            bitset<32> addressExtend;
             // if (instruction[15] == true) {
             //     addressExtend = bitset<32>(string(14, '1') + instruction.to_string().substr(16, 16) + string("00"));
             // }
@@ -318,12 +327,12 @@ int main()
             else
                 addressExtend = bitset<32>(string(19, '0') + instruction.to_string().substr(0, 1) + instruction.to_string().substr(24, 1) + instruction.to_string().substr(2, 6) \
                                 + instruction.to_string().substr(20, 4) + string("0"));
-            
+
             //addressExtend = bitset<32>(tmp.to_string().substr(2, 30) + string("00"));
             PC = bitset<32>(PC.to_ulong() + addressExtend.to_ulong());
         }
         else if (isJType[0]) {
-            bitset<32> addressExtend; 
+            bitset<32> addressExtend;
             //imm[20|10:1|11|19:12]
             if (instruction[0] == true)
                 addressExtend = bitset<32>(string(11, '1') + instruction.to_string().substr(0, 1) + instruction.to_string().substr(12, 8) + instruction.to_string().substr(11, 1) \
@@ -337,7 +346,7 @@ int main()
             PC = bitset<32>(PC.to_ulong() + 4);
         }
 
-        myRF.OutputRF(); // dump RF;    
+        myRF.OutputRF(); // dump RF;
     }
     myDataMem.OutputDataMem(); // dump data mem
 
