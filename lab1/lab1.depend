@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1650434211 source:d:\sophomore_\ผฦื้\lab\lab1\lab1_sh\lab1\main.cpp
+	<iostream>
+	<string>
+	<vector>
+	<bitset>
+	<fstream>
+

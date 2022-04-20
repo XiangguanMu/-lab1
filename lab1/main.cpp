@@ -125,7 +125,7 @@ public:
         unsigned int address = ReadAddress.to_ulong();
         for(int i = 0; i < 4; i++){
             for(int j = 0; j < 8; j++){
-                Instruction[i*8+j] = IMem[address+i][j];
+                Instruction[31-(i*8+j)] = IMem[address+i][j];
             }
         }
 
@@ -287,7 +287,7 @@ int main() {
             //imm[11:0]
             tmp = bitset<64>(instruction.to_string().substr(0, 12)); // if positive, 0 padded
             if (tmp[20]) {//这里有问题
-                tmp = bitset<52>(string(52, '1') + tmp.to_string().substr(20, 12));
+                tmp = bitset<64>(string(52, '1') + tmp.to_string().substr(20, 12));
             }
         } else if (isStore[0] == 1) {//这里的temp有什么特殊含义？目前只知道代表了立即数
             //mm[11:5] rs2 rs1 010 imm[4:0]
