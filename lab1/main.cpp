@@ -26,13 +26,24 @@ public:
     {
         Registers.resize(32); //预设定有32个寄存器
         Registers[0] = bitset<64>(0);//把所有的位初始化为0
+        unsigned long ul=1;
+        Registers[10]=bitset<64>(2); // A
+        Registers[11]=bitset<64>(0); // B
+        Registers[28] = bitset<64>(ul);
+        Registers[29] = bitset<64>(0);
     }
 
     void ReadWrite(bitset<5> RdReg1, bitset<5> RdReg2, bitset<5> WrtReg, bitset<64> WrtData, bitset<1> WrtEnable) //WrtEnable 0 is read else is read and write
     {
+        cout<<'&'<<bitset<1>(WrtEnable)<<endl;
+        cout<<'^'<<bitset<64>(WrtData)<<endl;
+        //cout<<bitset<5>(RdReg1)<<' '<<bitset<5>(RdReg2)<<' '<<bitset<5>(WrtReg)<<endl;
         // TODO: implement!
         ReadData1 = Registers[RdReg1.to_ulong()];
+
         ReadData2 = Registers[RdReg2.to_ulong()];
+
+        cout<<bitset<64>(ReadData1)<<' '<<bitset<64>(ReadData2)<<endl;
 
         if(WrtEnable.to_ulong()==1){
             Registers[WrtReg.to_ulong()] = WrtData;
@@ -70,6 +81,7 @@ public:
         }
         else if (ALUOP.to_string() == "001")  // sub
         {
+            cout<<"|||||||||||"<<endl;
             ALUresult = oprand1.to_ulong() - oprand2.to_ulong();
         }
         else if (ALUOP.to_string() == "010")  // and
@@ -88,6 +100,7 @@ public:
         {
             ;
         }
+        cout<<bitset<64>(ALUresult)<<endl;
         return ALUresult;
     }
 };
@@ -123,10 +136,13 @@ public:
         // TODO: implement!
         // (Read the byte at the ReadAddress and the following three byte).
         unsigned int address = ReadAddress.to_ulong();
+        cout<<"********"<<endl;
         for(int i = 0; i < 4; i++){
             for(int j = 0; j < 8; j++){
-                Instruction[31-(i*8+j)] = IMem[address+i][j];
+                cout<<IMem[address+i][j]<<' ';
+                Instruction[31-(i*8+j)] = IMem[address+i][7-j];
             }
+            cout<<endl;
         }
 
         //
@@ -195,7 +211,8 @@ public:
         dmemout.open("dmemresult.txt");
         if (dmemout.is_open())
         {
-            for (int j = 0; j < 1000; j++)
+            dmemout<<"********"<<endl;
+            for (int j = 0; j < 20; j++)
             {
                 dmemout << DMem[j] << endl;
             }
@@ -232,6 +249,8 @@ int main() {
     while (1) {
         // 1. Fetch Instruction
         bitset<32> instruction = myInsMem.ReadMemory(PC);
+        cout<<bitset<32>(PC)<<endl;
+        cout<<bitset<32>(instruction)<<endl;
 
         // If current insturciton is "11111111111111111111111111111111", then break;
         if (myInsMem.Instruction.to_ulong() == 0xffffffff) {
@@ -289,13 +308,15 @@ int main() {
             if (tmp[11]) {//这里有问题
                 tmp = bitset<64>(string(52, '1') + tmp.to_string().substr(52, 12));
             }
-        } else if (isStore[0] == 1) {//这里的temp有什么特殊含义？目前只知道代表了立即数
+        }
+        else if (isStore[0] == 1) {//这里的temp有什么特殊含义？目前只知道代表了立即数
             //mm[11:5] rs2 rs1 010 imm[4:0]
             tmp = bitset<64>(instruction.to_string().substr(0, 7) +
                              instruction.to_string().substr(20, 5)); // if positive, 0 padded
             if (tmp[20]) {
                 tmp = bitset<64>(string(52, '1') + tmp.to_string().substr(20, 12));
             }
+        }
             else if (isJType[0] == 1) {
                 if (instruction[31])
                     tmp = bitset<64>(string(32, '1') + PC.to_string()); // R[rd] = PC + 4
@@ -305,6 +326,7 @@ int main() {
             else if (isBranch[0] == 1) {
 
             }
+
 
             myALU.ALUOperation(aluOp, myRF.ReadData1,
                                (isIType[0] || isJType[0] || isLoad[0] || isStore[0]) ? tmp : myRF.ReadData2);//
@@ -364,9 +386,10 @@ int main() {
             }
 
             myRF.OutputRF(); // dump RF;
+
         }
         myDataMem.OutputDataMem(); // dump data mem
 
         return 0;
-    }
+
 }
