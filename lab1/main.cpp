@@ -286,8 +286,8 @@ int main() {
         if (isLoad[0] == 1 || isIType[0] == 1) {
             //imm[11:0]
             tmp = bitset<64>(instruction.to_string().substr(0, 12)); // if positive, 0 padded
-            if (tmp[20]) {//这里有问题
-                tmp = bitset<64>(string(52, '1') + tmp.to_string().substr(20, 12));
+            if (tmp[11]) {//这里有问题
+                tmp = bitset<64>(string(52, '1') + tmp.to_string().substr(52, 12));
             }
         } else if (isStore[0] == 1) {//这里的temp有什么特殊含义？目前只知道代表了立即数
             //mm[11:5] rs2 rs1 010 imm[4:0]
