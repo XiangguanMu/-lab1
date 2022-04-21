@@ -48,7 +48,7 @@ public:
         if(WrtEnable.to_ulong()==1){
             Registers[WrtReg.to_ulong()] = WrtData;
         }
-
+        cout<<Registers[WrtReg.to_ulong()]<<endl;
     }
 
     void OutputRF() {
@@ -77,12 +77,13 @@ public:
         // TODO: implement!
         if (ALUOP.to_string() == "000" || ALUOP.to_string() == "101")  // add/sd/ld
         {
-            ALUresult = oprand1.to_ulong() + oprand2.to_ulong();
+            ALUresult = oprand1.to_ullong() + oprand2.to_ullong();//太大了会产生std:overflow_error
         }
         else if (ALUOP.to_string() == "001")  // sub
         {
             cout<<"|||||||||||"<<endl;
-            ALUresult = oprand1.to_ulong() - oprand2.to_ulong();
+            ALUresult = oprand1.to_ullong() - oprand2.to_ullong();
+            cout<<"result"<<' '<<ALUresult<<endl;
         }
         else if (ALUOP.to_string() == "010")  // and
         {
@@ -126,7 +127,7 @@ public:
             }
 
         }
-        else cout << "Unable to open file";
+        else cout << "Unable to open file1"<<endl;
         imem.close();
 
     }
@@ -139,7 +140,7 @@ public:
         cout<<"********"<<endl;
         for(int i = 0; i < 4; i++){
             for(int j = 0; j < 8; j++){
-                cout<<IMem[address+i][j]<<' ';
+                cout<<IMem[address+i][7-j]<<' ';
                 Instruction[31-(i*8+j)] = IMem[address+i][7-j];
             }
             cout<<endl;
@@ -173,7 +174,7 @@ public:
                 i++;
             }
         }
-        else cout << "Unable to open file";
+        else cout << "Unable to open file2"<<endl;
         dmem.close();
 
     }
@@ -183,7 +184,7 @@ public:
         if(readmem[0] == 1){
             //返回address对应的数据
             string s;
-            unsigned int address = Address.to_ulong();
+            unsigned long long address = Address.to_ulong();
             for(int i = 0; i < 8; i++){
                 //取八个字节的数据
                 s.append(DMem[address+i].to_string());
@@ -195,7 +196,7 @@ public:
 
         if(writemem[0] == 1){//返回？
             //写到对应地址的位置
-            unsigned int address = Address.to_ulong();
+            unsigned long address = Address.to_ulong();
             for(int i = 0; i < 64; i++){//big-endian
                 DMem[address+i/8][i%8] = WriteData[i];
             }
@@ -317,15 +318,15 @@ int main() {
                 tmp = bitset<64>(string(52, '1') + tmp.to_string().substr(20, 12));
             }
         }
-            else if (isJType[0] == 1) {
-                if (instruction[31])
-                    tmp = bitset<64>(string(32, '1') + PC.to_string()); // R[rd] = PC + 4
-                else
-                    tmp = bitset<64>(string(32, '0') + PC.to_string());
-            }
-            else if (isBranch[0] == 1) {
+        else if (isJType[0] == 1) {
+            if (instruction[31])
+                tmp = bitset<64>(string(32, '1') + PC.to_string()); // R[rd] = PC + 4
+            else
+                tmp = bitset<64>(string(32, '0') + PC.to_string());
+        }
+        else if (isBranch[0] == 1) {
 
-            }
+        }
 
 
             myALU.ALUOperation(aluOp, myRF.ReadData1,
