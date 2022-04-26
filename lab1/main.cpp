@@ -26,11 +26,6 @@ public:
     {
         Registers.resize(32); //预设定有32个寄存器
         Registers[0] = bitset<64>(0);//把所有的位初始化为0
-        unsigned long ul=1;
-        Registers[10]=bitset<64>(2); // A
-        Registers[11]=bitset<64>(0); // B
-        Registers[28] = bitset<64>(ul);
-        Registers[29] = bitset<64>(0);
     }
 
     void ReadWrite(bitset<5> RdReg1, bitset<5> RdReg2, bitset<5> WrtReg, bitset<64> WrtData, bitset<1> WrtEnable) //WrtEnable 0 is read else is read and write
@@ -57,6 +52,7 @@ public:
         if (rfout.is_open()) {
             rfout << "A state of RF:" << endl; // << 类似于fprintf(fp,"A state of");把内容输出到指定文件里
             for (int j = 0; j < 32; j++) {
+                rfout<<"reg"<<j<<':';
                 rfout << Registers[j] << endl; //将每个寄存器输出到文件
             }
 
@@ -198,7 +194,7 @@ public:
             //写到对应地址的位置
             unsigned long address = Address.to_ulong();
             for(int i = 0; i < 64; i++){//big-endian
-                DMem[address+i/8][i%8] = WriteData[i];
+                DMem[address+i/8][7-i%8] = WriteData[63-i];
             }
             return WriteData;
         }
@@ -212,8 +208,7 @@ public:
         dmemout.open("dmemresult.txt");
         if (dmemout.is_open())
         {
-            dmemout<<"********"<<endl;
-            for (int j = 0; j < 20; j++)
+            for (int j = 0; j < 100; j++)
             {
                 dmemout << DMem[j] << endl;
             }
@@ -266,7 +261,7 @@ int main() {
         isRType = instruction.to_string().substr(25, 7) == string("0110011");
         isBranch = instruction.to_string().substr(25, 7) == string("1100011");
         isIType = instruction.to_string().substr(25, 5) == string("00100") ||
-                  instruction.to_string().substr(25, 5) == string("11000");
+                  instruction.to_string().substr(25, 5) == string("00000");
         wrtEnable = !(isStore.to_ulong() || isBranch.to_ulong());
         if (isRType[0] == 1) {//判断ALU的操作
             if (instruction.to_string().substr(17, 3) == string("000")) {
@@ -368,7 +363,8 @@ int main() {
 
                 //addressExtend = bitset<32>(tmp.to_string().substr(2, 30) + string("00"));
                 PC = bitset<32>(PC.to_ulong() + addressExtend.to_ulong());
-            } else if (isJType[0]) {
+            }
+            else if (isJType[0]) {
                 bitset<32> addressExtend;
                 //imm[20|10:1|11|19:12]
                 if (instruction[0] == true)
@@ -382,7 +378,8 @@ int main() {
                                                instruction.to_string().substr(11, 1) \
  + instruction.to_string().substr(1, 10) + string("0"));
                 PC = bitset<32>(PC.to_ulong() + addressExtend.to_ulong());
-            } else {
+            }
+            else {
                 PC = bitset<32>(PC.to_ulong() + 4);
             }
 
