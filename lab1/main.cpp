@@ -242,6 +242,7 @@ int main() {
     bitset<1> isRType;
     bitset<3> aluOp;
 
+
     while (1) {
         // 1. Fetch Instruction
         bitset<32> instruction = myInsMem.ReadMemory(PC);
